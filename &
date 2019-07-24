@@ -1,0 +1,58 @@
+from urllib.parse import urlencode
+
+import requests
+
+import json
+
+
+
+APP_ID = '7058341'
+AUTH_URL = 'https://oauth.vk.com/authorize'
+AUTH_DATA = {
+    'client_id': APP_ID,
+    'display': 'page',
+    'scope': 'friends',
+    'response_type': 'token'
+}
+
+TOKEN = 'ae4081a856d61a0ae1a9b81dbdbffdf1705b435a92f200d551f016d43b6c61f4fd312d3e315e875eee383'
+
+params = {
+    'access_token': TOKEN,
+    'v': '5.52'
+}
+
+
+class User:
+    def __init__(self, user_id):
+        self.user_id = user_id
+
+
+    def __call__(self):
+        self.params = params.copy()
+        self.params['user_id'] = self.user_id
+        self.response = requests.get(
+            'https://api.vk.com/method/friends.get',
+            params=self.params)
+        # print(self.response.text)
+        self.response_list = json.loads(self.response.text)
+        return self.response_list
+
+    def __and__(self, other):
+        common_friend_list = set(self.response_list['response']['items']) & set(other.response_list['response']['items'])
+
+        return common_friend_list
+
+
+
+
+id_1 = input('Введите id первого пользователя ')
+id_2 = input('Введите id второго пользователя ')
+
+user_1 = User(id_1)
+user_2 = User(id_2)
+
+user_1()
+user_2()
+
+print(user_1 & user_2)
